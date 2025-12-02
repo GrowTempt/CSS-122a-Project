@@ -7,7 +7,7 @@ USE cs122a_hw2;
 -- Q1: User and Agent Creator/Client (SQL DDL for entity(ies) table(s) only)
 
 -- User Table (10 points)
-CREATE TABLE Users (
+CREATE TABLE User (
     uid INT,
     email TEXT NOT NULL,
     username TEXT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE AgentCreator (
     bio TEXT,
     payout TEXT,
     PRIMARY KEY (uid),
-    FOREIGN KEY (uid) REFERENCES Users(uid) ON DELETE CASCADE
+    FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE
 );
 
 -- Agent Client Table (Delta Table for ISA Relationship)(10 points)
@@ -33,7 +33,7 @@ CREATE TABLE AgentClient (
     cvv INT NOT NULL,
     zip INT NOT NULL,
     PRIMARY KEY (uid),
-    FOREIGN KEY (uid) REFERENCES Users(uid) ON DELETE CASCADE
+    FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE
 );
 
 

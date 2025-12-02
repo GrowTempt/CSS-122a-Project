@@ -1,3 +1,5 @@
+import db_functions
+
 from dotenv import load_dotenv
 import os
 import mysql.connector
@@ -18,7 +20,12 @@ mydb = mysql.connector.connect(
 )
 
 def main():
-   print("hello World")
+   return
 
 if __name__ == "__main__":
     main()
+
+    args = sys.argv[2:]
+
+    db_functions.insertAgentClient(*args)
+    db_functions.deleteBaseModel(*args)
