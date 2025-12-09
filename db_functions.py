@@ -126,54 +126,60 @@ def import_data(folder_name: str):
 
 
 def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_holder:str, expiration_date:str, cvv:int, zip:int, interests:str):
-    # convert string arguments from command line into correct datatypes
-    uid = int(uid)
-    card_number = int(card_number)
-    cvv = int(cvv)
-    zip = int(zip)
-
-    # insert agent client
     cursor = mydb.cursor()
+    try:
+        # convert string arguments from command line into correct datatypes
+        uid = int(uid)
+        card_number = int(card_number)
+        cvv = int(cvv)
+        zip = int(zip)
 
-    # first put uid, email, and username into user
-    query = """
-            INSERT IGNORE INTO User (uid, email, username) 
-            VALUES (%s, %s, %s)
-            """
-    values = (uid, email, username)
+        query = """
+                INSERT IGNORE INTO User (uid, email, username) 
+                VALUES (%s, %s, %s)
+                """
+        values = (uid, email, username)
 
-    cursor.execute(query, values)
-    mydb.commit()
+        cursor.execute(query, values)
+        mydb.commit()
 
-    query = """
-            INSERT IGNORE INTO AgentClient (uid, interests, cardholder, expire, cardno, cvv, zip) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """
-    values = (uid, interests, card_holder, expiration_date,card_number, cvv, zip)   
+        query = """
+                INSERT IGNORE INTO AgentClient (uid, interests, cardholder, expire, cardno, cvv, zip) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+        values = (uid, interests, card_holder, expiration_date,card_number, cvv, zip)   
     
-    cursor.execute(query, values)
-    mydb.commit()
+        cursor.execute(query, values)
+        mydb.commit()
+        cursor.close()
+        print("Success")
     
-    return
+    except Exception:
+        cursor.close()
+        print("Fail")
+    
 
 
 def deleteBaseModel(bmid:int):
     # delete base model from table
-    uid = int(uid)
+    cursor = mydb.cursor()
+    try:
+        uid = int(uid)
 
-    cursor = mydb.cursor
+        query = """
+                DELETE FROM BaseModel WHERE bmid = (bmid)
+                VALUES (%s)
+                """
+        values = (bmid)
 
-    query = """
-            DELETE FROM BaseModel WHERE bmid = (bmid)
-            VALUES (%s)
-            """
-    values = (bmid)
-
-    cursor.execute(query,values)
-    mydb.commit()
+        cursor.execute(query,values)
+        mydb.commit()
+        cursor.close()
+        print("Success")
     
-    return
-
+    except Exception:
+        cursor.close()
+        print("Fail")
 
 def listInternetService(bmid: int):
     cursor = mydb.cursor()
@@ -194,6 +200,35 @@ def listInternetService(bmid: int):
         for row in results:
             print(",".join(str(x) for x in row))
 
+        cursor.close()
+
+    except Exception:
+        cursor.close()
+        print("Fail")
+
+def countCustomizedModel (*bmid_list: int):
+    # for each base model, count how many customized models are built from it
+    cursor = mydb.cursor()
+    try:
+        all_results = []
+        bmid_list = list(bmid_list)
+
+        for bmid in bmid_list:
+            query = """
+                    SELECT B.bmid, B.description, COUNT(C.mid)
+                    FROM BaseModel B
+                    JOIN CustomizedModel C ON B.bmid = C.bmid
+                    WHERE B.bmid = %s
+                    """
+            values = (bmid)
+
+            cursor.execute(query, values)
+            results = cursor.fetchall()
+            all_results.append(results)
+
+        for result in all_results:
+            print(",".join(str(x) for x in result))
+        
         cursor.close()
 
     except Exception:
