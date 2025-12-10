@@ -320,6 +320,7 @@ def keywordSearch(keyword: str):
     cursor.execute(query, (search_pattern,))
     results = cursor.fetchall()
     
+    
     for row in results:
         print(",".join(str(x) for x in row))
     
