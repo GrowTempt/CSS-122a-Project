@@ -22,6 +22,9 @@ def main():
 
     elif function == "countCustomizedModel":
         db_functions.countCustomizedModel(*args)
+    
+    elif function == "topNDurationConfig":
+        db_functions.topNDurationConfig(*args)
 
     elif function == "printN2LSQLresult":
         db_functions.printNL2SQLresult(*args)

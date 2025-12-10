@@ -20,6 +20,8 @@ mydb = mysql.connector.connect(
 def import_data(folder_name: str):
     cursor = mydb.cursor()
     try:
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+
         # drop tables
         drop_tables = [
             "ModelConfigurations", "ModelServices", "DataStorage", "LLMService",
@@ -85,6 +87,9 @@ def import_data(folder_name: str):
         ]
         for ddl in ddls:
             cursor.execute(ddl)
+
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+
         # import CSV files
         load_order = [
             "User", "AgentCreator", "AgentClient", "BaseModel", "CustomizedModel",
@@ -96,9 +101,11 @@ def import_data(folder_name: str):
             if not os.path.exists(path):
                 continue
             with open(path, "r") as f:
-                csvReader = csv.reader(f)
-                next(csvReader)
-                for row in csvReader:
+                reader = csv.reader(f)
+                next(reader, None)
+
+                for row in reader:
+                    if not row: continue
                     row = [None if x == "NULL" else x for x in row]
                     placeholders = ",".join(["%s"] * len(row))
                     cursor.execute(f"INSERT INTO {table} VALUES ({placeholders})", row)
@@ -108,7 +115,7 @@ def import_data(folder_name: str):
         print("Success")
 
     except Exception:
-        cursor.close()
+        if cursor: cursor.close()
         print("Fail")
 
 
@@ -220,6 +227,33 @@ def countCustomizedModel (*bmid_list: int):
 
         for result in all_results:
             print(",".join(str(x) for x in result))
+        
+        cursor.close()
+
+    except Exception:
+        cursor.close()
+        print("Fail")
+
+def topNDurationConfig(uid: int, N: int):
+    cursor = mydb.cursor()
+    try:
+        uid = int(uid)
+        N = int(N)
+
+        query = """
+            SELECT C.client_uid, C.cid, C.labels, C.content, M.duration
+            FROM ModelConfigurations M
+            JOIN Configuration C ON M.cid = C.cid
+            WHERE C.client_uid = %s
+            ORDER BY M.duration DESC
+            LIMIT %s
+        """
+
+        cursor.execute(query, (uid, N))
+        results = cursor.fetchall()
+
+        for row in results:
+            print(",".join(str(x) for x in row))
 
         cursor.close()
 
