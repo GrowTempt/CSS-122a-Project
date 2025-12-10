@@ -17,6 +17,7 @@ mydb = mysql.connector.connect(
   database=DATABASE
 )
 
+
 def import_data(folder_name: str):
     cursor = mydb.cursor()
     try:
@@ -119,7 +120,6 @@ def import_data(folder_name: str):
         print("Fail")
 
 
-
 def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_holder:str, expiration_date:str, cvv:int, zip:int, interests:str):
     cursor = mydb.cursor()
     try:
@@ -154,7 +154,6 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
         print("Fail")
     
 
-
 def deleteBaseModel(bmid:int):
     # delete base model from table
     cursor = mydb.cursor()
@@ -175,7 +174,6 @@ def deleteBaseModel(bmid:int):
     except Exception:
         cursor.close()
         print("Fail")
-
 
 
 def listInternetService(bmid: int):
@@ -202,7 +200,6 @@ def listInternetService(bmid: int):
     except Exception:
         cursor.close()
         print("Fail")
-
 
 
 def countCustomizedModel (*bmid_list: int):
@@ -264,11 +261,9 @@ def topNDurationConfig(uid: int, N: int):
         print("Fail")
 
 
-
 def printNL2SQLresult ():
     with open('NL2SQL_results', mode='r') as file:
         csvFile = csv.reader(file)
         for lines in csvFile:
             print(lines)
-
     return
