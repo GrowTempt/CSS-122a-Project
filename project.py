@@ -20,6 +20,11 @@ def main():
     elif function == "listInternetService":
         db_functions.listInternetService(*args)
 
+    elif function == "countCustomizedModel":
+        db_functions.countCustomizedModel(*args)
+
+    elif function == "printN2LSQLresult":
+        db_functions.printNL2SQLresult(*args)
 
 if __name__ == "__main__":
     main()

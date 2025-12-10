@@ -28,63 +28,52 @@ def import_data(folder_name: str):
         ]
         for t in drop_tables:
             cursor.execute(f"DROP TABLE IF EXISTS {t}")
-
         # create tables
         ddls = [
             """CREATE TABLE User (
                 uid INT, email TEXT NOT NULL, username TEXT NOT NULL,
                 PRIMARY KEY (uid))""",
-
             """CREATE TABLE AgentCreator (
                 uid INT, bio TEXT, payout TEXT,
                 PRIMARY KEY (uid),
                 FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE)""",
-
             """CREATE TABLE AgentClient (
                 uid INT, interests TEXT NOT NULL, cardholder TEXT NOT NULL,
                 expire DATE NOT NULL, cardno INT NOT NULL, cvv INT NOT NULL,
                 zip INT NOT NULL, PRIMARY KEY (uid),
                 FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE)""",
-
             """CREATE TABLE BaseModel (
                 bmid INT, creator_uid INT NOT NULL, description TEXT NOT NULL,
                 PRIMARY KEY (bmid),
                 FOREIGN KEY (creator_uid) REFERENCES AgentCreator(uid)
                 ON DELETE CASCADE)""",
-
             """CREATE TABLE CustomizedModel (
                 bmid INT, mid INT NOT NULL,
                 PRIMARY KEY (bmid, mid),
                 FOREIGN KEY (bmid) REFERENCES BaseModel(bmid)
                 ON DELETE CASCADE)""",
-
             """CREATE TABLE Configuration (
                 cid INT, client_uid INT NOT NULL, content TEXT NOT NULL,
                 labels TEXT NOT NULL, PRIMARY KEY (cid),
                 FOREIGN KEY (client_uid) REFERENCES AgentClient(uid)
                 ON DELETE CASCADE)""",
-
             """CREATE TABLE InternetService (
                 sid INT, provider TEXT NOT NULL, endpoints TEXT NOT NULL,
                 PRIMARY KEY (sid))""",
-
             """CREATE TABLE LLMService (
                 sid INT, domain TEXT, PRIMARY KEY (sid),
                 FOREIGN KEY (sid) REFERENCES InternetService(sid)
                 ON DELETE CASCADE)""",
-
             """CREATE TABLE DataStorage (
                 sid INT, type TEXT, PRIMARY KEY (sid),
                 FOREIGN KEY (sid) REFERENCES InternetService(sid)
                 ON DELETE CASCADE)""",
-
             """CREATE TABLE ModelServices (
                 bmid INT NOT NULL, sid INT NOT NULL, version INT NOT NULL,
                 PRIMARY KEY (bmid, sid),
                 FOREIGN KEY (bmid) REFERENCES BaseModel(bmid) ON DELETE CASCADE,
                 FOREIGN KEY (sid) REFERENCES InternetService(sid)
                 ON DELETE CASCADE)""",
-
             """CREATE TABLE ModelConfigurations (
                 bmid INT NOT NULL, mid INT NOT NULL, cid INT NOT NULL,
                 duration INT NOT NULL,
@@ -94,24 +83,22 @@ def import_data(folder_name: str):
                 FOREIGN KEY (cid) REFERENCES Configuration(cid)
                 ON DELETE CASCADE)"""
         ]
-
         for ddl in ddls:
             cursor.execute(ddl)
-
         # import CSV files
         load_order = [
             "User", "AgentCreator", "AgentClient", "BaseModel", "CustomizedModel",
             "Configuration", "InternetService", "LLMService", "DataStorage",
             "ModelServices", "ModelConfigurations"
         ]
-
         for table in load_order:
             path = os.path.join(folder_name, f"{table}.csv")
             if not os.path.exists(path):
                 continue
-
             with open(path, "r") as f:
-                for row in csv.reader(f):
+                csvReader = csv.reader(f)
+                next(csvReader)
+                for row in csvReader:
                     row = [None if x == "NULL" else x for x in row]
                     placeholders = ",".join(["%s"] * len(row))
                     cursor.execute(f"INSERT INTO {table} VALUES ({placeholders})", row)
@@ -123,6 +110,7 @@ def import_data(folder_name: str):
     except Exception:
         cursor.close()
         print("Fail")
+
 
 
 def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_holder:str, expiration_date:str, cvv:int, zip:int, interests:str):
@@ -170,7 +158,7 @@ def deleteBaseModel(bmid:int):
                 DELETE FROM BaseModel WHERE bmid = (bmid)
                 VALUES (%s)
                 """
-        values = (bmid)
+        values = (bmid,)
 
         cursor.execute(query,values)
         mydb.commit()
@@ -180,6 +168,8 @@ def deleteBaseModel(bmid:int):
     except Exception:
         cursor.close()
         print("Fail")
+
+
 
 def listInternetService(bmid: int):
     cursor = mydb.cursor()
@@ -206,6 +196,8 @@ def listInternetService(bmid: int):
         cursor.close()
         print("Fail")
 
+
+
 def countCustomizedModel (*bmid_list: int):
     # for each base model, count how many customized models are built from it
     cursor = mydb.cursor()
@@ -218,9 +210,9 @@ def countCustomizedModel (*bmid_list: int):
                     SELECT B.bmid, B.description, COUNT(C.mid)
                     FROM BaseModel B
                     JOIN CustomizedModel C ON B.bmid = C.bmid
-                    WHERE B.bmid = %s
+                    WHERE B.bmid = (%s)
                     """
-            values = (bmid)
+            values = (bmid,)
 
             cursor.execute(query, values)
             results = cursor.fetchall()
@@ -228,9 +220,19 @@ def countCustomizedModel (*bmid_list: int):
 
         for result in all_results:
             print(",".join(str(x) for x in result))
-        
+
         cursor.close()
 
     except Exception:
         cursor.close()
         print("Fail")
+
+
+
+def printNL2SQLresult ():
+    with open('NL2SQL_results', mode='r') as file:
+        csvFile = csv.reader(file)
+        for lines in csvFile:
+            print(lines)
+
+    return
