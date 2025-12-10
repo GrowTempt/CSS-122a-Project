@@ -36,47 +36,57 @@ def import_data(folder_name: str):
             """CREATE TABLE User (
                 uid INT, email TEXT NOT NULL, username TEXT NOT NULL,
                 PRIMARY KEY (uid))""",
+
             """CREATE TABLE AgentCreator (
                 uid INT, bio TEXT, payout TEXT,
                 PRIMARY KEY (uid),
                 FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE)""",
+
             """CREATE TABLE AgentClient (
                 uid INT, interests TEXT NOT NULL, cardholder TEXT NOT NULL,
                 expire DATE NOT NULL, cardno INT NOT NULL, cvv INT NOT NULL,
                 zip INT NOT NULL, PRIMARY KEY (uid),
                 FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE)""",
+
             """CREATE TABLE BaseModel (
                 bmid INT, creator_uid INT NOT NULL, description TEXT NOT NULL,
                 PRIMARY KEY (bmid),
                 FOREIGN KEY (creator_uid) REFERENCES AgentCreator(uid)
                 ON DELETE CASCADE)""",
+
             """CREATE TABLE CustomizedModel (
                 bmid INT, mid INT NOT NULL,
                 PRIMARY KEY (bmid, mid),
                 FOREIGN KEY (bmid) REFERENCES BaseModel(bmid)
                 ON DELETE CASCADE)""",
+
             """CREATE TABLE Configuration (
                 cid INT, client_uid INT NOT NULL, content TEXT NOT NULL,
                 labels TEXT NOT NULL, PRIMARY KEY (cid),
                 FOREIGN KEY (client_uid) REFERENCES AgentClient(uid)
                 ON DELETE CASCADE)""",
+
             """CREATE TABLE InternetService (
                 sid INT, provider TEXT NOT NULL, endpoints TEXT NOT NULL,
                 PRIMARY KEY (sid))""",
+
             """CREATE TABLE LLMService (
                 sid INT, domain TEXT, PRIMARY KEY (sid),
                 FOREIGN KEY (sid) REFERENCES InternetService(sid)
                 ON DELETE CASCADE)""",
+
             """CREATE TABLE DataStorage (
                 sid INT, type TEXT, PRIMARY KEY (sid),
                 FOREIGN KEY (sid) REFERENCES InternetService(sid)
                 ON DELETE CASCADE)""",
+
             """CREATE TABLE ModelServices (
                 bmid INT NOT NULL, sid INT NOT NULL, version INT NOT NULL,
                 PRIMARY KEY (bmid, sid),
                 FOREIGN KEY (bmid) REFERENCES BaseModel(bmid) ON DELETE CASCADE,
                 FOREIGN KEY (sid) REFERENCES InternetService(sid)
                 ON DELETE CASCADE)""",
+
             """CREATE TABLE ModelConfigurations (
                 bmid INT NOT NULL, mid INT NOT NULL, cid INT NOT NULL,
                 duration INT NOT NULL,
@@ -152,7 +162,7 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
     except Exception:
         cursor.close()
         print("Fail")
-    
+
 
 def deleteBaseModel(bmid:int):
     # delete base model from table
@@ -230,7 +240,6 @@ def countCustomizedModel (*bmid_list: int):
     except Exception:
         cursor.close()
         print("Fail")
-
 
 
 def topNDurationConfig(uid: int, N: int):
