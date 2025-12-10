@@ -262,7 +262,7 @@ def topNDurationConfig(uid: int, N: int):
 
 
 def printNL2SQLresult ():
-    with open('NL2SQL_results', mode='r') as file:
+    with open('results.csv', mode='r') as file:
         csvFile = csv.reader(file)
         for lines in csvFile:
             print(lines)
