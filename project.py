@@ -20,6 +20,9 @@ def main():
     elif function == "listInternetService":
         db_functions.listInternetService(*args)
 
+    elif function == "topNDurationConfig":
+        db_functions.topNDurationConfig(*args)
+
 
 if __name__ == "__main__":
     main()
