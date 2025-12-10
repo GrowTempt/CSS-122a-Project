@@ -164,6 +164,40 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
         print("Fail")
 
 
+def addCustomizedModel(mid:int, bmid:int):
+    #add customized model to table
+
+    #grab all the needed info
+    cursor = mydb.cursor()
+
+    #check if base model exists
+
+    query = """
+            SELECT * 
+            FROM BaseModel b
+            WHERE b.bmid = %s
+            """
+    cursor.execute(query, (bmid,))
+    results = cursor.fetchall()
+
+    if results:
+        #add customized model
+        query = """
+                INSERT IGNORE INTO CustomizedModel (bmid, mid)
+                VALUES (%s, %s)
+                """          
+        values = (bmid, mid)
+
+        cursor.execute(query, values)
+        mydb.commit()
+
+        return
+
+    else:
+        return False
+
+
+
 def deleteBaseModel(bmid:int):
     # delete base model from table
     cursor = mydb.cursor()
@@ -268,6 +302,28 @@ def topNDurationConfig(uid: int, N: int):
     except Exception:
         cursor.close()
         print("Fail")
+
+def keywordSearch(keyword: str):
+    cursor = mydb.cursor
+    query = """
+            SELECT *
+            FROM BaseModel as b
+            INNER JOIN ModelServices as ms ON b.bmid = ms.bmid
+            INNER JOIN LLMService as l ON ms.sid = l.sid
+            WHERE l.domain LIKE %s
+            ORDER BY b.bmid ASC
+            LIMIT 5
+            """
+          
+    search_pattern = f"%{keyword}%"
+    
+    cursor.execute(query, (search_pattern,))
+    results = cursor.fetchall()
+    
+    for row in results:
+        print(",".join(str(x) for x in row))
+    
+    cursor.close()
 
 
 def printNL2SQLresult ():
