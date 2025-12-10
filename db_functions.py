@@ -234,6 +234,8 @@ def countCustomizedModel (*bmid_list: int):
         cursor.close()
         print("Fail")
 
+
+
 def topNDurationConfig(uid: int, N: int):
     cursor = mydb.cursor()
     try:
