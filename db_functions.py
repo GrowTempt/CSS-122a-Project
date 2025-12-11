@@ -312,7 +312,7 @@ def keywordSearch(keyword: str):
         cursor = mydb.cursor()
         
         query = """
-                SELECT *
+                SELECT b.bmid, ms.sid, I.provider, l.domain
                 FROM BaseModel as b
                 INNER JOIN ModelServices as ms ON b.bmid = ms.bmid
                 INNER JOIN LLMService as l ON ms.sid = l.sid
@@ -326,8 +326,9 @@ def keywordSearch(keyword: str):
         cursor.execute(query, (search_pattern,))
         results = cursor.fetchall()
         
-        for row in results:
-            print(",".join(str(x) for x in row))
+        if results:
+            for row in results:
+                print(",".join(str(x) for x in row))
             
     except Exception:
         pass 
