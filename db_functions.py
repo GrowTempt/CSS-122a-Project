@@ -190,7 +190,7 @@ def addCustomizedModel(mid:int, bmid:int):
         if results:
             #add customized model
             query = """
-                    INSERT IGNORE INTO CustomizedModel (bmid, mid)
+                    INSERT INTO CustomizedModel (bmid, mid)
                     VALUES (%s, %s)
                     """          
             values = (bmid, mid)
