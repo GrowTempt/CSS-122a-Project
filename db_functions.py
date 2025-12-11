@@ -209,21 +209,23 @@ def addCustomizedModel(mid:int, bmid:int):
         cursor.close()
 
 
-def deleteBaseModel(bmid:int):
-    # delete base model from table
+def deleteBaseModel(bmid: int):
     cursor = mydb.cursor()
     try:
         bmid = int(bmid)
 
         query = "DELETE FROM BaseModel WHERE bmid = %s"
-
         cursor.execute(query, (bmid,))
+        
+        if cursor.rowcount == 0:
+            raise Exception("No row deleted")
+
         mydb.commit()
         cursor.close()
         print("Success")
     
     except Exception:
-        cursor.close()
+        if cursor: cursor.close()
         print("Fail")
 
 
