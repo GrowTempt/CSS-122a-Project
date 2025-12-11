@@ -315,7 +315,7 @@ def topNDurationConfig(uid: int, N: int):
         print("Fail")
 
 def keywordSearch(keyword: str):
-    cursor = mydb.cursor
+    cursor = mydb.cursor()
     query = """
             SELECT *
             FROM BaseModel as b
