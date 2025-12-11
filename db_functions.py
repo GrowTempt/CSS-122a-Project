@@ -1,21 +1,25 @@
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import mysql.connector
 import csv
 
-load_dotenv()
+# load_dotenv()
 
-HOST = os.getenv("HOST")
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
-DATABASE = os.getenv("DATABASE")
+HOST = os.getenv("HOST", "localhost")
+USERNAME = os.getenv("USERNAME", "test")
+PASSWORD = os.getenv("PASSWORD", "password")
+DATABASE = os.getenv("DATABASE", "cs122a")
 
-mydb = mysql.connector.connect(
-  host=HOST,
-  user=USERNAME,
-  password=PASSWORD,
-  database=DATABASE
-)
+try:
+    mydb = mysql.connector.connect(
+      host=HOST,
+      user=USERNAME,
+      password=PASSWORD,
+      database=DATABASE
+    )
+except Exception:
+    print("Fail")
+    exit()
 
 
 def import_data(folder_name: str):
@@ -23,7 +27,6 @@ def import_data(folder_name: str):
     try:
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
 
-        # drop tables
         drop_tables = [
             "ModelConfigurations", "ModelServices", "DataStorage", "LLMService",
             "InternetService", "Configuration", "CustomizedModel", "BaseModel",
@@ -31,7 +34,7 @@ def import_data(folder_name: str):
         ]
         for t in drop_tables:
             cursor.execute(f"DROP TABLE IF EXISTS {t}")
-        # create tables
+
         ddls = [
             """CREATE TABLE User (
                 uid INT, email TEXT NOT NULL, username TEXT NOT NULL,
@@ -44,7 +47,7 @@ def import_data(folder_name: str):
 
             """CREATE TABLE AgentClient (
                 uid INT, interests TEXT NOT NULL, cardholder TEXT NOT NULL,
-                expire DATE NOT NULL, cardno INT NOT NULL, cvv INT NOT NULL,
+                expire DATE NOT NULL, cardno BIGINT NOT NULL, cvv INT NOT NULL,
                 zip INT NOT NULL, PRIMARY KEY (uid),
                 FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE)""",
 
@@ -99,33 +102,37 @@ def import_data(folder_name: str):
         for ddl in ddls:
             cursor.execute(ddl)
 
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-
-        # import CSV files
         load_order = [
             "User", "AgentCreator", "AgentClient", "BaseModel", "CustomizedModel",
             "Configuration", "InternetService", "LLMService", "DataStorage",
             "ModelServices", "ModelConfigurations"
         ]
+
         for table in load_order:
             path = os.path.join(folder_name, f"{table}.csv")
             if not os.path.exists(path):
                 continue
+
             with open(path, "r") as f:
                 reader = csv.reader(f)
-                next(reader, None)
-
-                for row in reader:
+                
+                for i, row in enumerate(reader):
                     if not row: continue
+                    
+                    if i == 0 and not row[0].strip().isdigit():
+                        continue
+
                     row = [None if x == "NULL" else x for x in row]
+                    
                     placeholders = ",".join(["%s"] * len(row))
                     cursor.execute(f"INSERT INTO {table} VALUES ({placeholders})", row)
 
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
         mydb.commit()
         cursor.close()
         print("Success")
 
-    except Exception:
+    except Exception as e:
         if cursor: cursor.close()
         print("Fail")
 
