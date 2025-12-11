@@ -147,7 +147,7 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
         zip = int(zip)
 
         query = """
-                INSERT INTO User (uid, email, username) 
+                INSERT IGNORE INTO User (uid, email, username) 
                 VALUES (%s, %s, %s)
                 """
         values = (uid, email, username)
