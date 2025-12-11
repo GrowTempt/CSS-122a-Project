@@ -147,7 +147,7 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
         zip = int(zip)
 
         query = """
-                INSERT IGNORE INTO User (uid, email, username) 
+                INSERT INTO User (uid, email, username) 
                 VALUES (%s, %s, %s)
                 """
         values = (uid, email, username)
@@ -156,7 +156,7 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
         mydb.commit()
 
         query = """
-                INSERT IGNORE INTO AgentClient (uid, interests, cardholder, expire, cardno, cvv, zip) 
+                INSERT INTO AgentClient (uid, interests, cardholder, expire, cardno, cvv, zip) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
         values = (uid, interests, card_holder, expiration_date,card_number, cvv, zip)   
