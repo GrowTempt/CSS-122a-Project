@@ -318,6 +318,7 @@ def keywordSearch(keyword: str):
                 FROM BaseModel as b
                 INNER JOIN ModelServices as ms ON b.bmid = ms.bmid
                 INNER JOIN LLMService as l ON ms.sid = l.sid
+                INNER JOIN InternetService as I ON ms.sid = I.sid
                 WHERE l.domain LIKE %s
                 ORDER BY b.bmid ASC
                 LIMIT 5
