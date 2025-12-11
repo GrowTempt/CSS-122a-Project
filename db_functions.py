@@ -147,7 +147,7 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
         zip = int(zip)
 
         query = """
-                INSERT INTO User (uid, email, username) 
+                INSERT IGNORE INTO User (uid, email, username) 
                 VALUES (%s, %s, %s)
                 """
         values = (uid, email, username)
@@ -210,25 +210,23 @@ def addCustomizedModel(mid:int, bmid:int):
         cursor.close()
 
 
-def deleteBaseModel(bmid:int):
-    # delete base model from table
+def deleteBaseModel(bmid: int):
     cursor = mydb.cursor()
     try:
-        uid = int(uid)
+        bmid = int(bmid)
 
-        query = """
-                DELETE FROM BaseModel WHERE bmid = (bmid)
-                VALUES (%s)
-                """
-        values = (bmid,)
+        query = "DELETE FROM BaseModel WHERE bmid = %s"
+        cursor.execute(query, (bmid,))
+        
+        if cursor.rowcount == 0:
+            raise Exception("No row deleted")
 
-        cursor.execute(query,values)
         mydb.commit()
         cursor.close()
         print("Success")
     
     except Exception:
-        cursor.close()
+        if cursor: cursor.close()
         print("Fail")
 
 
@@ -304,11 +302,14 @@ def topNDurationConfig(uid: int, N: int):
         """
 
         cursor.execute(query, (uid, N))
+    
+        results = cursor.fetchone()
+        print(results)
+        """
         results = cursor.fetchall()
-
         for row in results:
             print(",".join(str(x) for x in row))
-
+        """
         cursor.close()
 
     except Exception:
