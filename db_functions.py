@@ -213,15 +213,11 @@ def deleteBaseModel(bmid:int):
     # delete base model from table
     cursor = mydb.cursor()
     try:
-        uid = int(uid)
+        bmid = int(bmid)
 
-        query = """
-                DELETE FROM BaseModel WHERE bmid = (bmid)
-                VALUES (%s)
-                """
-        values = (bmid,)
+        query = "DELETE FROM BaseModel WHERE bmid = %s"
 
-        cursor.execute(query,values)
+        cursor.execute(query, (bmid,))
         mydb.commit()
         cursor.close()
         print("Success")
