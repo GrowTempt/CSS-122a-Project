@@ -255,31 +255,26 @@ def listInternetService(bmid: int):
         print("Fail")
 
 
-def countCustomizedModel (*bmid_list: int):
-    # for each base model, count how many customized models are built from it
+def countCustomizedModel(*bmid_list):
     cursor = mydb.cursor()
     try:
-        all_results = []
-        bmid_list = list(bmid_list)
-
-        for bmid in bmid_list:
+        bmid_ints = sorted([int(x) for x in bmid_list])
+        
+        for bmid in bmid_ints:
             query = """
-                    SELECT B.bmid, B.description, COUNT(C.mid)
-                    FROM BaseModel B
-                    JOIN CustomizedModel C ON B.bmid = C.bmid
-                    WHERE B.bmid = (%s)
-                    """
-            values = (bmid,)
-
-            cursor.execute(query, values)
+                SELECT B.bmid, B.description, COUNT(C.mid)
+                FROM BaseModel B
+                LEFT JOIN CustomizedModel C ON B.bmid = C.bmid
+                WHERE B.bmid = %s
+                GROUP BY B.bmid, B.description
+            """
+            cursor.execute(query, (bmid,))
             results = cursor.fetchall()
-            all_results.append(results)
-
-        for result in all_results:
-            print(",".join(str(x) for x in result))
+            
+            for row in results:
+                print(",".join(str(x) for x in row))
         
         cursor.close()
-
     except Exception:
         cursor.close()
         print("Fail")
