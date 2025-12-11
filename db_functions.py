@@ -299,8 +299,9 @@ def topNDurationConfig(uid: int, N: int):
         cursor.execute(query, (uid, N))
     
         results = cursor.fetchall()
-        if results:
-            print(results[1])
+
+        print(",".join(str(x) for x in results[0]))
+
         cursor.close()
 
     except Exception:
