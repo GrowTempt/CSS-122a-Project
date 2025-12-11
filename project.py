@@ -14,6 +14,9 @@ def main():
     elif function == "insertAgentClient":
         db_functions.insertAgentClient(*args)
 
+    elif function == "addCustomizedModel":
+        db_functions.addCustomizedModel(*args)
+
     elif function == "deleteBaseModel":
         db_functions.deleteBaseModel(*args)
 
@@ -25,6 +28,9 @@ def main():
     
     elif function == "topNDurationConfig":
         db_functions.topNDurationConfig(*args)
+
+    elif function == "listBaseModelKeyWord":
+        db_functions.keywordSearch(*args)
 
     elif function == "printN2LSQLresult":
         db_functions.printNL2SQLresult(*args)
