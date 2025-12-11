@@ -300,7 +300,8 @@ def topNDurationConfig(uid: int, N: int):
     
         results = cursor.fetchall()
 
-        print(",".join(str(x) for x in results[0]))
+        for row in results:
+            print(",".join(str(x) for x in row))
 
         cursor.close()
 
