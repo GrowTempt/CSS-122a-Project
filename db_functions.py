@@ -171,31 +171,35 @@ def addCustomizedModel(mid:int, bmid:int):
     cursor = mydb.cursor()
 
     #check if base model exists
-
-    query = """
-            SELECT * 
-            FROM BaseModel b
-            WHERE b.bmid = %s
-            """
-    cursor.execute(query, (bmid,))
-    results = cursor.fetchall()
-
-    if results:
-        #add customized model
+    try:
         query = """
-                INSERT IGNORE INTO CustomizedModel (bmid, mid)
-                VALUES (%s, %s)
-                """          
-        values = (bmid, mid)
+                SELECT * 
+                FROM BaseModel b
+                WHERE b.bmid = %s
+                """
+        cursor.execute(query, (bmid,))
+        results = cursor.fetchall()
 
-        cursor.execute(query, values)
-        mydb.commit()
+        if results:
+            #add customized model
+            query = """
+                    INSERT IGNORE INTO CustomizedModel (bmid, mid)
+                    VALUES (%s, %s)
+                    """          
+            values = (bmid, mid)
 
-        return
+            cursor.execute(query, values)
+            mydb.commit()
 
-    else:
-        return False
-
+            print("Success")
+        else:
+            print("Fail")
+    except Exception:
+        mydb.rollback()
+        print("Fail")
+    
+    finally:
+        cursor.close()
 
 
 def deleteBaseModel(bmid:int):
