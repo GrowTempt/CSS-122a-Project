@@ -288,11 +288,12 @@ def topNDurationConfig(uid: int, N: int):
         N = int(N)
 
         query = """
-            SELECT C.client_uid, C.cid, C.labels, C.content, M.duration
-            FROM ModelConfigurations M
-            JOIN Configuration C ON M.cid = C.cid
+            SELECT C.client_uid, C.cid, C.labels, C.content, MAX(M.duration) AS max_duration
+            FROM Configuration C
+            JOIN ModelConfigurations M ON C.cid = M.cid
             WHERE C.client_uid = %s
-            ORDER BY M.duration DESC
+            GROUP BY C.client_uid, C.cid, C.labels, C.content
+            ORDER BY max_duration DESC
             LIMIT %s
         """
 
