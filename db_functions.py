@@ -174,18 +174,18 @@ def insertAgentClient(uid:int, username:str, email:str, card_number:int, card_ho
 def addCustomizedModel(mid:int, bmid:int):
     #add customized model to table
 
-    #grab all the needed info
-    cursor = mydb.cursor()
 
     #check if base model exists
     try:
-        query = """
-                SELECT * 
+        cursor = mydb.cursor()
+
+        query_check_base = """
+                SELECT 1 
                 FROM BaseModel b
                 WHERE b.bmid = %s
                 """
-        cursor.execute(query, (bmid,))
-        results = cursor.fetchall()
+        cursor.execute(query_check_base, (bmid,))
+        results = cursor.fetchone()
 
         if results:
             #add customized model
@@ -202,7 +202,8 @@ def addCustomizedModel(mid:int, bmid:int):
         else:
             print("Fail")
     except Exception:
-        mydb.rollback()
+        if mydb.is_connected():    
+            mydb.rollback()
         print("Fail")
     
     finally:
@@ -255,31 +256,26 @@ def listInternetService(bmid: int):
         print("Fail")
 
 
-def countCustomizedModel (*bmid_list: int):
-    # for each base model, count how many customized models are built from it
+def countCustomizedModel(*bmid_list):
     cursor = mydb.cursor()
     try:
-        all_results = []
-        bmid_list = list(bmid_list)
-
-        for bmid in bmid_list:
+        bmid_ints = sorted([int(x) for x in bmid_list])
+        
+        for bmid in bmid_ints:
             query = """
-                    SELECT B.bmid, B.description, COUNT(C.mid)
-                    FROM BaseModel B
-                    JOIN CustomizedModel C ON B.bmid = C.bmid
-                    WHERE B.bmid = (%s)
-                    """
-            values = (bmid,)
-
-            cursor.execute(query, values)
+                SELECT B.bmid, B.description, COUNT(C.mid)
+                FROM BaseModel B
+                LEFT JOIN CustomizedModel C ON B.bmid = C.bmid
+                WHERE B.bmid = %s
+                GROUP BY B.bmid, B.description
+            """
+            cursor.execute(query, (bmid,))
             results = cursor.fetchall()
-            all_results.append(results)
-
-        for result in all_results:
-            print(",".join(str(x) for x in result))
+            
+            for row in results:
+                print(",".join(str(x) for x in row))
         
         cursor.close()
-
     except Exception:
         cursor.close()
         print("Fail")
@@ -312,27 +308,32 @@ def topNDurationConfig(uid: int, N: int):
         print("Fail")
 
 def keywordSearch(keyword: str):
-    cursor = mydb.cursor()
-    query = """
-            SELECT *
-            FROM BaseModel as b
-            INNER JOIN ModelServices as ms ON b.bmid = ms.bmid
-            INNER JOIN LLMService as l ON ms.sid = l.sid
-            WHERE l.domain LIKE %s
-            ORDER BY b.bmid ASC
-            LIMIT 5
-            """
-          
-    search_pattern = f"%{keyword}%"
-    
-    cursor.execute(query, (search_pattern,))
-    results = cursor.fetchall()
-    
-    
-    for row in results:
-        print(",".join(str(x) for x in row))
-    
-    cursor.close()
+    try:
+        cursor = mydb.cursor()
+        
+        query = """
+                SELECT *
+                FROM BaseModel as b
+                INNER JOIN ModelServices as ms ON b.bmid = ms.bmid
+                INNER JOIN LLMService as l ON ms.sid = l.sid
+                WHERE l.domain LIKE %s
+                ORDER BY b.bmid ASC
+                LIMIT 5
+                """
+                
+        search_pattern = f"%{keyword}%"
+        
+        cursor.execute(query, (search_pattern,))
+        results = cursor.fetchall()
+        
+        for row in results:
+            print(",".join(str(x) for x in row))
+            
+    except Exception:
+        pass 
+        
+    finally:
+        cursor.close()
 
 
 def printNL2SQLresult ():
